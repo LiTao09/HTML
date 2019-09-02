@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title></title>
+    <link rel="stylesheet" href="../static/bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../static/bower_components//bootstrap/dist/css/bootstrap-theme.css">
+    <script src="../static/bower_components/jquery/dist/jquery.js"></script>
+    <script src="../static/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <style>
+        #types>li:hover {
+            background: #bbb;
+        }
+    </style>
+    <script>
+        $(function () {    //页面加载完成以后进行的函数
+            $('#types>li').click(function () {
+                var t = $(this).text().trim();     //当前为li,取出trim后的值
+                var pid = $(this).attr('name');   //attr,取name属性的值，name在下面name='{{i[0]}}'
+                $('#parent').val(t + ":" + pid);     //在input中加入当前的值+属性
+            });
+            $('#btnAdd').click(function () {
+                var type = $('#type').val();
+                var parent = $('#parent').val();
+                                //ajax
+                var ajax = new XMLHttpRequest();  //定义ajax关键对象
+                ajax.onreadystatechange = function () {     //设置回调
+                    if (ajax.readyState == 4 && ajax.status == 200) {
+                        var data = ajax.responseText;
+                        data = eval("(" + data + ")");//eval将字符串解析,将返回速记字符串转换成对象
+                        // alert(data);
+                        var lblAdd = document.querySelector('#lblAdd')
+                        if (data.result == 'ok') {
+                        // dom操作，在列表中加入新的类型
+                            var newli=$(document.createElement('li'));
+                            newli.attr('name',data.id).attr('title','ID'+data.id);
+                            newli.text(data.typeName);
+                            lblAdd.innerHTML = '添加成功';
+                        } else {
+                            lblAdd.innerHTML = '添加失败';
+                        }
+                    }
+                }//检测状态变化ajax.readyState==4&&ajax.status==200代表成功交互服务器
+                ajax.open('POST','/addtype', true);            //打开,以POST方式发送，向/addtype服务器发送,true代表异步发送
+                ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");//请求头
+                ajax.send('type=' + type + '&parent=' + parent);      //发送数据
+            });
+            function del(){
+               var tr= $(this).parent().parent();
+               tr.unbind('click',del);          //解绑事件，释放内存
+               tr.children().first().text();   //id
+               //将id发送给服务器，删除sql
+                $.get()             // 12
+
+
+               tr.remove();
+
+            }
+            // 查询列表
+            $('#btnSearch').click(function(){
+                var key=$('searchName').val();
+                $.post('/searchTypeList',{'key':key,'page':1,'size':5},function(data,status){   //传送到后台1，发送地址，2.发送数据，json对象，3，回调函数
+
+                var body=$('#type-list');
+                
+                for(var i =0;i<data.length;i++) {
+                    tr=$(document.createElement('tr'));
+                    tdid=$(document.createElement('td'));
+                    tdname=$(document.createElement('td'));
+                    tdoperate=$(document.createElement('td'));   //1
+                                                                 //2
+                }
+                })       
+            });
+        });
+    </script>
+</head>
+
+<body>
+        {{types}}
+    <div class="container">
+        <div class="panel panel-primary">
+            <!--  bs3-panel: -->
+            <div class="panel-heading">
+                <h3 class="panel-title">添加分类</h3>
+            </div>
+            <div class="panel-body">
+<!-- --------------------------------- -->
+            <!--  bs3-input: -->
+                <div class="input-group">
+                    <div class="input-group-addon">类型名：</div>
+                    <input type="text" class="form-control" id="type" id="exampleInputAmount">
+                </div>
+                <br>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="parent">
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default 
+                        dropdown-toggle" data-toggle="dropdown">父类型
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu pull-right" id='types'>
+                            <li name='' title="无ID">顶级分类</li>
+                            {% for i in types %}
+                            <li name='{{i[0]}}' title="ID:{{i[0]}}">
+                                {{i[1]}}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <br>
+<!-- ========================================================================== -->
+                <span class="label label-info" id="lblAdd">&nbsp;</span>
+                <button id="btnAdd" type="button" class="btn btn-primary pull-right">添加</button>
+            </div>
+        </div>
+ <!-- =======   =================bs3-panel:heading============================================= -->
+            
+            <div class="panel panel-default">
+                  <div class="panel-heading">
+                        <h3 class="panel-title">查询列表</h3>
+                  </div>
+                  <div class="panel-body">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchName" placeholder="输入类型名">
+                            <span class="input-group-btn">
+                                <button id="btnSearch" type="button" class="btn btn-default">查询</button>
+                            </span>
+                        </div>
+<!-- ===================================table====================================================================== -->
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                        <th>id</th>
+                                        <th> 类型名</th>
+                                        <th> 操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="type-list">
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table><!--table class="table"-->
+                        
+                        
+                  </div>
+            </div><!--panel panel-default-->
+            
+    </div> <!--container-->
+</body>
+
+</html>
