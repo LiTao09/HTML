@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="../static/bootstrap.css">
+    <link rel="stylesheet" href="../static/bootstrap-theme.css">
+    <script src="../static/jquery.js"></script>
+    <script src="../static/bootstrap.js"></script>
+    <script>
+        $(function(){
+            $('#types>li').click(function(){
+                var t=$(this).text().trim();
+                var pid=$(this).attr('name');
+                $('#parent').val(t + ":" + pid);
+            });
+
+            $('#btnAdd').click(function () {
+                var type = $('#type').val();
+                var parent = $('#parent').val();
+                //ajax关键对象
+                var ajax = new XMLHttpRequest();  //定义ajax关键对象
+                ajax.onreadystatechange = function () {     //设置回调
+                    if (ajax.readyState == 4 && ajax.status == 200) {
+                        var data = ajax.responseText;
+                        data = eval("(" + data + ")");//eval将字符串解析,将返回速记字符串转换成对象
+                        // alert(data);
+                        var lblAdd = document.querySelector('#lblAdd')
+                        if (data.result == 'ok') {
+                            lblAdd.innerHTML = '添加成功';
+                        } else {
+                            lblAdd.innerHTML = '添加失败';
+                        }
+                    }
+                }//检测状态变化ajax.readyState==4&&ajax.status==200代表成功交互服务器
+                ajax.open('POST','/addtype', true);            //打开,以POST方式发送，向/addtype服务器发送,true代表异步发送
+                ajax.setRequestHeader("Content-type","application/x-www-form-urlencoded");//请求头
+                ajax.send('type=' + type + '&parent=' + parent);      //发送数据
+            });
+        });
+    
+    </script>
+</head>
+<body>
+    <div class="container">
+    <div class="panel panel-primary">
+          <div class="panel-heading">
+                <h3 class="panel-title">添加分类</h3>
+          </div>
+          <div class="panel-body">
+<!--========================================================================================== -->
+            
+            <div class="input-group">
+                <div class="input-group-addon">输入类型名</div>
+                <input type="text" class="form-control" id="exampleInputAmount" placeholder="Amount">
+            </div>
+            <br>
+                <div class="input-group">
+                        <input type="text" class="form-control" id="parent">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default 
+                            dropdown-toggle" data-toggle="dropdown">父类型
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu pull-right"  id='types'>
+                                    <li name='' title="无ID">顶级分类</li>
+                                    {% for i in types %}
+                                    <li name='{{i[0]}}' title="ID:{{i[0]}}">
+                                        {{i[1]}}
+                                    </li>
+                                    {% endfor %}
+                            </ul>
+                        </div><!-- /btn-group -->
+                    </div><!-- /input-group -->
+                    <br>
+                    <!-- ====================================== -->
+                    <span class="label label-info" id="lblAdd">&nbsp;</span>
+                    <button id="btnAdd" type="button" class="btn btn-primary pull-right">添加</button>
+          </div>
+    </div>
+
+
+
+    </div><!-- /container -->
+
+
+
+
+
+        
+</body>
+</html>
